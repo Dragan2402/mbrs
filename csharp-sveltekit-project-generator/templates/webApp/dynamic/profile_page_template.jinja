@@ -1,0 +1,28 @@
+<script lang="ts">
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import api from '$lib/auth/http';
+
+  let loading = true;
+  let id = Number($page.url?.searchParams.get("id"));
+
+  onMount(async () => {
+    if (id) {
+      const response = await api.{{ class_name | lower }}.get{{ class_name }}ById(id);
+    } else {
+        goto('/');
+    }
+    loading = false;
+  });
+</script>
+
+<div class='flex items-center justify-center border p-10 gap-4'>
+  {{ '{#' }}if loading}
+    <div>Loading...</div>
+  {:else}
+    <div>
+      Profile for {{ class_name }}
+    </div>
+  {/if}
+</div>

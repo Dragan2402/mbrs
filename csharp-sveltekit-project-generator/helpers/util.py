@@ -6,3 +6,15 @@ NAMESPACES = {
     "MagicDraw_Profile": "http://www.omg.org/spec/UML/20110701/MagicDrawProfile",
     "StandardProfileL3": "http://www.omg.org/spec/UML/20110701/StandardProfileL3",
 }
+
+CSHARP_TYPE_MAPPER = {
+    "long": "long",
+    "String": "string",
+    "int": "int",
+    "boolean": "bool",
+    "double": "double",
+    "float": "float",
+    "Date": "DateTime",
+    "byte": "byte",
+    "short": "short",
+}

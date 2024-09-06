@@ -1,0 +1,60 @@
+using {{ project_name }}.Infrastructure.Extensions;
+using {{ project_name }}.Data;
+using System.Reflection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.RegisterDbContext(builder.Configuration);
+builder.Services.RegisterFluentValidation();
+builder.Services.RegisterControllers();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.RegisterAppServices();
+builder.Services.RegisterAutoMapper();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = true;
+});
+
+builder.Services.RegisterAuthorization();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<{{ context_name }}DbContext>();
+    context.Database.Migrate();
+}
+
+app.UseCors("_AllowAllOrigins");
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseSwaggerUI();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.MapDefaultControllerRoute();
+
+app.Run();

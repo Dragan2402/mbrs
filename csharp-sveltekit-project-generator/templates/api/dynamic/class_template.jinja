@@ -1,0 +1,11 @@
+namespace {{ project_name }}.Domain;
+
+public class {{ class_name }} : Entity
+{
+    {% for property in properties %}    
+    public {{ property.type }} {{ property.name }} { get; set; } 
+        {% if property.is_single_reference %}
+        public long {{ property.name + 'Id' }} { get; set; }
+        {% endif %}   
+    {% endfor %}
+}

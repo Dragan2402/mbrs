@@ -1,0 +1,81 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Npgsql;
+using { { project_name } }.Common.Auth;
+using { { project_name } }.Configuration;
+using { { project_name } }.Contracts.Data.Internal.Input;
+using { { project_name } }.Contracts.Mappers.Converters;
+using System.Net;
+using System.Net.Mail;
+using System.Reflection;
+using System.Text.Json.Serialization;
+
+namespace {{ project_name }}.Infrastructure.Extensions;
+
+public static class ServiceExtensions
+{
+    public static void ConfigurePolicy(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(
+                General.AllowAllOrigins,
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+        });
+    }
+
+    public static void RegisterDbContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
+        dataSourceBuilder.UseNetTopologySuite();
+        var dataSource = dataSourceBuilder.Build();
+
+        services.AddDbContext<ApplicationReadOnlyDbContext>(
+            options =>
+            {
+                options.UseNpgsql(dataSource, o => o.UseNetTopologySuite()).UseSnakeCaseNamingConvention();
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            },
+            ServiceLifetime.Scoped);
+        services.AddDbContext<ShipTestContext>(options =>
+            options.UseNpgsql(dataSource, options => options.EnableRetryOnFailure().UseNetTopologySuite()).UseSnakeCaseNamingConvention());
+    }
+
+    public static void RegisterControllers(this IServiceCollection services)
+    {
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
+    }
+
+    public static void RegisterAppServices(this IServiceCollection services)
+    {
+    }
+
+    public static void RegisterAutoMapper(this IServiceCollection services)
+    {
+    }
+
+    public static void RegisterFluentValidation(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    public static void RegisterAuthorization(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+    }
+}
