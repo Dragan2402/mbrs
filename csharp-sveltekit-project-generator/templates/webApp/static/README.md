@@ -36,3 +36,11 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## Generating api
+
+Please run this command
+
+```bash
+npx swagger-typescript-api@12.0.4 -p https://localhost:7159/swagger/v1/swagger.json -o ./src/lib/api -n apiV1.ts --module-name-index 1 -t swagger-templates/
+```

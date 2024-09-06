@@ -1,0 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using {{ project_name }}.Domain;
+
+namespace {{ project_name }}.Data;
+
+public class {{ context_name }}DbContext : DbContext
+{
+    protected {{ context_name }}DbContext(DbContextOptions options) : base(options)
+    {
+    }
+
+    {% for class in classes %}
+    public DbSet<{{ class.name }}> {{ class.plural_name }} { get; set; }
+    {% endfor %}
+
+    protected void ConfigureModel(ModelBuilder builder)
+    {
+    }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+    }
+}

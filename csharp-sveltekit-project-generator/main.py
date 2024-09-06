@@ -49,9 +49,9 @@ def main():
     print(f"Model Path: {args.model_path}")
     print(f"Output Path: {args.output_path}")
 
-    parser_service.parse(args.model_path)
-    generator_service.generate_api(args.output_path, args.project_name)
-    generator_service.generate_web_app(args.output_path, args.project_name)
+    classes = parser_service.parse(args.model_path)
+    generator_service.generate_api(args.output_path, args.project_name, classes)
+    generator_service.generate_web_app(args.output_path, args.project_name, classes)
 
 
 if __name__ == "__main__":
