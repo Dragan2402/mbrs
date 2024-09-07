@@ -27,6 +27,9 @@ def generate_api(output_path: str, project_name: str, classes: list[EntityClass]
     )
     _generate_domain(output_path, project_name, classes, env)
     _generate_db_context(output_path, project_name, classes, env)
+    _generate_repositories(output_path, project_name, classes, env)
+    _generate_services(output_path, project_name, classes, env)
+    _generate_service_extensions(output_path, project_name, classes, env)
 
 
 def generate_web_app(output_path: str, project_name: str, classes: list[EntityClass]):
@@ -45,6 +48,7 @@ def _generate_structure(source_path: str, output_path: str, project_name: str, i
     context = {
         "project_name": project_name,
         "context_name": project_name.split(".")[0],
+        "database_name": project_name.split(".")[0],
         "project_id": _generate_random_project_id(),
     }
 
@@ -140,3 +144,82 @@ def _generate_db_context(output_path: str, project_name: str, classes: list[Enti
         output_file.write(rendered_content)
 
     print(f"API: All db context files for {project_name} processed successfully.")
+
+def _generate_repositories(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating repositories for {project_name}...")
+    repository_template = env.get_template("repository_template.jinja")
+    interface_template = env.get_template("repository_interface_template.jinja")
+
+    os.makedirs(f"{output_path}/Application/Repositories", exist_ok=True)
+    os.makedirs(f"{output_path}/Infrastructure/Repositories", exist_ok=True)
+
+    for entity_class in classes:
+        rendered_repository_content = repository_template.render(entity_class.get_context(project_name))
+        rendered_interface_content = interface_template.render(entity_class.get_context(project_name))
+
+        interface_output_file_path = os.path.join(
+            output_path, "Application", "Repositories",  f"I{entity_class.name}Repository.cs"
+        )
+
+        repository_output_file_path = os.path.join(
+            output_path, "Infrastructure", "Repositories",  f"{entity_class.name}Repository.cs"
+        )
+
+        with open(repository_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_repository_content)
+
+        with open(interface_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_interface_content)
+
+    print(f"API: All repository files for {project_name} processed successfully.")
+
+def _generate_services(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating services for {project_name}...")
+    service_template = env.get_template("service_template.jinja")
+    interface_template = env.get_template("service_interface_template.jinja")
+
+    os.makedirs(f"{output_path}/Application/Services", exist_ok=True)
+    os.makedirs(f"{output_path}/Infrastructure/Services", exist_ok=True)
+
+    for entity_class in classes:
+        rendered_service_content = service_template.render(entity_class.get_context(project_name))
+        rendered_interface_content = interface_template.render(entity_class.get_context(project_name))
+
+        interface_output_file_path = os.path.join(
+            output_path, "Application", "Services",  f"I{entity_class.name}Service.cs"
+        )
+
+        service_output_file_path = os.path.join(
+            output_path, "Infrastructure", "Services",  f"{entity_class.name}Service.cs"
+        )
+
+        with open(service_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_service_content)
+
+        with open(interface_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_interface_content)
+
+    print(f"API: All services files for {project_name} processed successfully.")
+
+def _generate_service_extensions(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating service extensions for {project_name}...")
+    template = env.get_template("service_extension_template.jinja")
+
+    os.makedirs(f"{output_path}/Infrastructure/Extensions", exist_ok=True)
+
+    context = {
+        'project_name': project_name,
+        'context_name': project_name.split('.')[0],
+        'classes': [{
+            'name': cls.name,
+            'plural_name': cls.get_plural_name(),
+        } for cls in classes]
+    }
+
+    rendered_content = template.render(context)
+
+    output_file_path = os.path.join(output_path, "Infrastructure", "Extensions", "ServiceExtensions.cs")
+    with open(output_file_path, "w", encoding="utf-8") as output_file:
+        output_file.write(rendered_content)
+
+    print(f"API: All service extensions files for {project_name} processed")

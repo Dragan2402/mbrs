@@ -1,0 +1,58 @@
+using Microsoft.EntityFrameworkCore;
+using {{ project_name }}.Application.Repositories;
+using {{ project_name }}.Domain;
+using {{ project_name }}.Data;
+
+namespace {{ project_name }}.Infrastructure.Repositories;
+
+public abstract class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
+{
+    protected readonly {{ context_name }}DbContext dbContext;
+
+    public BaseRepository({{ context_name }}DbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
+    public virtual async Task<T> GetAsync(long id)
+    {
+        var entity = await dbContext.Set<T>().SingleOrDefaultAsync(e => e.Id == id);
+
+        if (entity == null)
+        {
+            throw new Exception($"Entity with {id} not found");
+        }
+
+        return entity;
+    }
+
+    public virtual async Task<T> AddAsync(T entity)
+    {
+        var entityEntry = await dbContext.Set<T>().AddAsync(entity);
+        await SaveChangesAsync();
+        return entityEntry.Entity;
+    }
+
+    public virtual T Update(T entity)
+    {
+        var entityEntry = dbContext.Set<T>().Update(entity);
+        SaveChanges();
+        return entityEntry.Entity;
+    }
+
+    public virtual void Delete(T entity)
+    {
+        dbContext.Remove(entity);
+        SaveChanges();
+    }
+
+    protected async Task SaveChangesAsync()
+    {
+        await dbContext.SaveChangesAsync();
+    }
+
+    protected void SaveChanges()
+    {
+        dbContext.SaveChanges();
+    }
+}

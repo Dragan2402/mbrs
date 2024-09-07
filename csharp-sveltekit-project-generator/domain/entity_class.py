@@ -13,6 +13,7 @@ class EntityClass:
         }
         if project_name:
             context["project_name"] = project_name
+            context["context_name"] = project_name.split(".")[0]
 
         return context
 

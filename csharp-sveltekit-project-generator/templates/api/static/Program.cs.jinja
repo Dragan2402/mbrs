@@ -1,22 +1,20 @@
 using {{ project_name }}.Infrastructure.Extensions;
 using {{ project_name }}.Data;
-using System.Reflection;
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true, reloadOnChange: true);
 
 builder.Services.RegisterDbContext(builder.Configuration);
 builder.Services.RegisterFluentValidation();
 builder.Services.RegisterControllers();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.RegisterAppServices();
 builder.Services.RegisterAutoMapper();
 
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,6 +25,8 @@ builder.Services.AddRouting(options =>
 });
 
 builder.Services.RegisterAuthorization();
+builder.Services.RegisterServices();
+builder.Services.RegisterRepositories();
 
 var app = builder.Build();
 
@@ -43,10 +43,14 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("_AllowAllOrigins");
 
+app.UseSwagger((opt) =>
+{
+    opt.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
+app.UseSwaggerUI();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
-app.UseSwaggerUI();
 
 app.UseRouting();
 

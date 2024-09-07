@@ -1,0 +1,11 @@
+using {{ project_name }}.Domain;
+
+namespace {{ project_name }}.Application.Repositories;
+
+public interface IBaseRepository<T> where T : class, IEntity
+{
+    Task<T> GetAsync(long id);
+    Task<T> AddAsync(T entity);
+    T Update(T entity);
+    void Delete(T entity);
+}

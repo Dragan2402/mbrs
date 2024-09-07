@@ -1,0 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using {{ project_name }}.Application.Repositories;
+using {{ project_name }}.Domain;
+using {{ project_name }}.Data;
+
+namespace {{ project_name }}.Infrastructure.Repositories;
+
+public class {{ class_name }}Repository : BaseRepository<{{ class_name }}>, IBaseRepository<{{ class_name }}>, I{{ class_name }}Repository
+{
+    public {{ class_name }}Repository({{ context_name }}DbContext dbContext) : base(dbContext)
+    {
+    }
+}

@@ -6,7 +6,7 @@ namespace {{ project_name }}.Data;
 
 public class {{ context_name }}DbContext : DbContext
 {
-    protected {{ context_name }}DbContext(DbContextOptions options) : base(options)
+    public {{ context_name }}DbContext(DbContextOptions options) : base(options)
     {
     }
 

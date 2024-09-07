@@ -1,16 +1,12 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using {{ project_name }}.Data;
+using {{ project_name }}.Infrastructure.Repositories;
+using {{ project_name }}.Application.Repositories;
+using {{ project_name }}.Application.Services;
+using {{ project_name }}.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using { { project_name } }.Common.Auth;
-using { { project_name } }.Configuration;
-using { { project_name } }.Contracts.Data.Internal.Input;
-using { { project_name } }.Contracts.Mappers.Converters;
-using System.Net;
-using System.Net.Mail;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -23,7 +19,7 @@ public static class ServiceExtensions
         services.AddCors(options =>
         {
             options.AddPolicy(
-                General.AllowAllOrigins,
+                "_AllowAllOrigins",
                 builder =>
                 {
                     builder.AllowAnyOrigin()
@@ -36,18 +32,10 @@ public static class ServiceExtensions
     public static void RegisterDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
-        dataSourceBuilder.UseNetTopologySuite();
         var dataSource = dataSourceBuilder.Build();
 
-        services.AddDbContext<ApplicationReadOnlyDbContext>(
-            options =>
-            {
-                options.UseNpgsql(dataSource, o => o.UseNetTopologySuite()).UseSnakeCaseNamingConvention();
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            },
-            ServiceLifetime.Scoped);
-        services.AddDbContext<ShipTestContext>(options =>
-            options.UseNpgsql(dataSource, options => options.EnableRetryOnFailure().UseNetTopologySuite()).UseSnakeCaseNamingConvention());
+        services.AddDbContext<{{ context_name }}DbContext>(options =>
+            options.UseNpgsql(dataSource, options => options.EnableRetryOnFailure()).UseSnakeCaseNamingConvention());
     }
 
     public static void RegisterControllers(this IServiceCollection services)
@@ -59,12 +47,23 @@ public static class ServiceExtensions
         });
     }
 
-    public static void RegisterAppServices(this IServiceCollection services)
-    {
-    }
-
     public static void RegisterAutoMapper(this IServiceCollection services)
     {
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+    }
+
+    public static void RegisterServices(this IServiceCollection services)
+    {
+        {% for class in classes %}
+        services.AddScoped<I{{ class.name }}Service, {{ class.name }}Service>();
+        {% endfor %}
+    }
+
+    public static void RegisterRepositories(this IServiceCollection services)
+    {
+        {% for class in classes %}
+        services.AddScoped<I{{ class.name }}Repository, {{ class.name }}Repository>();
+        {% endfor %}
     }
 
     public static void RegisterFluentValidation(this IServiceCollection services)
@@ -75,7 +74,5 @@ public static class ServiceExtensions
 
     public static void RegisterAuthorization(this IServiceCollection services)
     {
-        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
     }
 }
