@@ -1,0 +1,20 @@
+using AutoMapper;
+using {{ project_name }}.Application.Repositories;
+using {{ project_name }}.Application.Services;
+using {{ project_name }}.Domain;
+
+namespace {{ project_name }}.Infrastructure.Services;
+
+public class {{ class_name }}Service : I{{ class_name }}Service
+{
+    private readonly IMapper mapper;
+    private readonly I{{ class_name }}Repository {{ class_name | lower}}Repository;
+
+    public {{ class_name }}Service(
+        IMapper mapper,
+        I{{ class_name }}Repository {{ class_name | lower}}Repository)
+    {
+        this.mapper = mapper;
+        this.{{ class_name | lower}}Repository = {{ class_name | lower}}Repository;
+    }
+}
