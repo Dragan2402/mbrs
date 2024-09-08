@@ -5,4 +5,6 @@ namespace {{ project_name }}.Application.Services;
 public interface I{{ class_name }}Service
 {
     Task<List<{{ class_name }}>> GetAllAsync();
+    Task<{{ class_name }}> GetByIdAsync(long id);
+    Task DeleteAsync(long id);
 }

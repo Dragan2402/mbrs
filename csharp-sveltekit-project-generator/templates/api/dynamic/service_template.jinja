@@ -22,4 +22,16 @@ public class {{ class_name }}Service : I{{ class_name }}Service
     {
         return await {{ class_name | lower}}Repository.GetAllAsync();
     }
+
+    public async Task<{{ class_name }}> GetByIdAsync(long id)
+    {
+        return await {{ class_name | lower}}Repository.GetAsync(id);
+    }
+
+    public async Task DeleteAsync(long id)
+    {
+        var {{ class_name | lower}} = await {{ class_name | lower}}Repository.GetAsync(id);
+
+        {{ class_name | lower}}Repository.Delete({{ class_name | lower}});
+    }
 }

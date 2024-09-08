@@ -53,7 +53,7 @@ def generate_web_app(output_path: str, project_name: str, classes: list[EntityCl
 
 
 def _generate_structure(source_path: str, output_path: str, project_name: str, is_api: bool = False):
-    print(f"{"API" if is_api else "WebAPP" }: Generating project structure for {project_name}...")
+    print(f"{"API" if is_api else "WebApp" }: Generating project structure for {project_name}...")
     context = {
         "project_name": project_name,
         "context_name": project_name.split(".")[0],
@@ -94,7 +94,7 @@ def _generate_structure(source_path: str, output_path: str, project_name: str, i
                 output_file_path = os.path.join(output_dir, new_file_name)
                 shutil.copy(file_path, output_file_path)
 
-    print(f"{"API" if is_api else "WebAPP" }: All static files for {project_name} processed successfully.")
+    print(f"{"API" if is_api else "WebApp" }: All static files for {project_name} processed successfully.")
 
 
 def _generate_random_project_id():
@@ -118,7 +118,7 @@ def _generate_domain(output_path: str, project_name: str, classes: list[EntityCl
     print(f"API: All domain files for {project_name} processed successfully.")
 
 def _generate_profile_pages(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
-    print(f"WebAPP: Generating profile pages for {project_name}...")
+    print(f"WebApp: Generating profile pages for {project_name}...")
     template = env.get_template("profile_page_template.jinja")
 
     for entity_class in classes:
@@ -130,10 +130,10 @@ def _generate_profile_pages(output_path: str, project_name: str, classes: list[E
         with open(output_file_path, "w", encoding="utf-8") as output_file:
             output_file.write(rendered_content)
     
-    print(f"WebAPP: All profile pages for {project_name} processed successfully.")
+    print(f"WebApp: All profile pages for {project_name} processed successfully.")
 
 def _generate_list_pages(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
-    print(f"WebAPP: Generating list pages for {project_name}...")
+    print(f"WebApp: Generating list pages for {project_name}...")
     template = env.get_template("list_page_template.jinja")
 
     for entity_class in classes:
@@ -146,7 +146,7 @@ def _generate_list_pages(output_path: str, project_name: str, classes: list[Enti
         with open(output_file_path, "w", encoding="utf-8") as output_file:
             output_file.write(rendered_content)
     
-    print(f"WebAPP: All list pages for {project_name} processed successfully.")
+    print(f"WebApp: All list pages for {project_name} processed successfully.")
 
 
 def _generate_db_context(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
@@ -307,7 +307,7 @@ def _generate_service_extensions(output_path: str, project_name: str, classes: l
     print(f"API: All service extensions files for {project_name} processed")
 
 def _generate_main_page(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
-    print(f"WebAPP: Generating main page for {project_name}...")
+    print(f"WebApp: Generating main page for {project_name}...")
     template = env.get_template("main_page_template.jinja")
 
     os.makedirs(f"{output_path}/src/routes", exist_ok=True)
@@ -325,10 +325,10 @@ def _generate_main_page(output_path: str, project_name: str, classes: list[Entit
     with open(output_file_path, "w", encoding="utf-8") as output_file:
         output_file.write(rendered_content)
 
-    print(f"WebAPP: Main page for {project_name} processed successfully.")
+    print(f"WebApp: Main page for {project_name} processed successfully.")
 
 def _generate_mappers(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
-    print(f"API: Generating mappers for {project_name}...")
+    print(f"WebApp: Generating mappers for {project_name}...")
     mapper_template = env.get_template("mapper_template.jinja")
 
     os.makedirs(f"{output_path}/src/lib/helpers", exist_ok=True)
@@ -344,4 +344,4 @@ def _generate_mappers(output_path: str, project_name: str, classes: list[EntityC
     with open(output_file_path, "w", encoding="utf-8") as output_file:
         output_file.write(rendered_content)
 
-    print(f"WebAPP: Mappers for {project_name} processed successfully.")
+    print(f"WebApp: Mappers for {project_name} processed successfully.")
