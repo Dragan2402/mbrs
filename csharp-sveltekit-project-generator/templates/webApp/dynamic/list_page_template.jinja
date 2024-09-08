@@ -40,7 +40,8 @@
     </div>
     <div class="flex flex-wrap gap-10">
       {{ '{#each ' + plural_name | lower + ' as ' + class_name | lower + ' }' }}
-        <button class="min-h-[150px] w-[250px] border border-gray-600 p-4 flex flex-col rounded-xl">
+        <button class="min-h-[150px] w-[250px] border border-gray-600 p-4 flex flex-col rounded-xl"
+        on:click={() => goto(`/{{ class_name | lower + "/profile?id=${" + class_name | lower +  ".id}"  }}`)}>
           <div>
             {{ '{' + class_name | lower + '.id}' }}
           </div>

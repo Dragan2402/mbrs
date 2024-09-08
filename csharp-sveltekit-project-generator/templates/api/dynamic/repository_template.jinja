@@ -16,4 +16,17 @@ public class {{ class_name }}Repository : BaseRepository<{{ class_name }}>, IBas
         return await dbContext.{{ plural_name }}{% for property in properties %}{% if property.include %}.Include(x => x.{{ property.name }}){% endif %}{% endfor %}
             .ToListAsync();
     }
+
+    public override async Task<{{ class_name }}> GetAsync(long id)
+    {
+        var {{ class_name | lower }} = await dbContext.{{ plural_name }}{% for property in properties %}{% if property.include %}.Include(x => x.{{ property.name }}){% endif %}{% endfor %}
+            .SingleOrDefaultAsync(x => x.Id == id);
+
+        if ({{ class_name | lower }} == null)
+        {
+            throw new Exception($"{{class_name }} not found");
+        }
+
+        return {{ class_name | lower }};
+    }
 }
