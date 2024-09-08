@@ -18,3 +18,7 @@ CSHARP_TYPE_MAPPER = {
     "byte": "byte",
     "short": "short",
 }
+
+
+def lower_first_letter(value):
+    return value[0].lower() + value[1:]

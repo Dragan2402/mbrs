@@ -10,4 +10,10 @@ public class {{ class_name }}Repository : BaseRepository<{{ class_name }}>, IBas
     public {{ class_name }}Repository({{ context_name }}DbContext dbContext) : base(dbContext)
     {
     }
+
+    public async Task<List<{{ class_name }}>> GetAllAsync()
+    {
+        return await dbContext.{{ plural_name }}{% for property in properties %}{% if property.include %}.Include(x => x.{{ property.name }}){% endif %}{% endfor %}
+            .ToListAsync();
+    }
 }

@@ -9,6 +9,7 @@ class EntityClass:
     def get_context(self, project_name: str | None) -> dict:
         context = {
             "class_name": self.name,
+            "plural_name": self.get_plural_name(),
             "properties": [prop.get_context() for prop in self.attributes],
         }
         if project_name:

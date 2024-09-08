@@ -1,0 +1,11 @@
+import type { {% for class in classes %} {{ class.class_name }}Response, {% endfor %} } from '$lib/api/apiV1';
+
+{% for class in classes %}
+export const map{{ class.class_name }}ResponseToString = (response: {{ class.class_name }}Response): string => {
+	let representingString = '';
+    {% for property in class.properties %} {% if property.displayed_in_reference %}
+    representingString = representingString + (response.{{ property.name | lower_first_letter }} ?? '' )+ ' '; 
+    {% endif %} {% endfor %}
+    return representingString;
+};
+{% endfor %}

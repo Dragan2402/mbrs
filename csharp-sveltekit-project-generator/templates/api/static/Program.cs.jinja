@@ -8,6 +8,7 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true, reloadOnChange: true);
 
+builder.Services.ConfigurePolicy();
 builder.Services.RegisterDbContext(builder.Configuration);
 builder.Services.RegisterFluentValidation();
 builder.Services.RegisterControllers();

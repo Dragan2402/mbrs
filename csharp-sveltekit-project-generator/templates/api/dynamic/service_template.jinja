@@ -17,4 +17,9 @@ public class {{ class_name }}Service : I{{ class_name }}Service
         this.mapper = mapper;
         this.{{ class_name | lower}}Repository = {{ class_name | lower}}Repository;
     }
+
+    public async Task<List<{{ class_name }}>> GetAllAsync()
+    {
+        return await {{ class_name | lower}}Repository.GetAllAsync();
+    }
 }
