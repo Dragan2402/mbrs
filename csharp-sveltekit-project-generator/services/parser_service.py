@@ -68,13 +68,16 @@ def _parse_attribute(attribute) -> EntityProperty | None:
     attribute_name = attribute.get("name")
     if attribute_name == None or attribute_name == "id":
         return None
-    attribute_type, is_single_reference = _parse_attribute_type(attribute)
-    return EntityProperty(attribute_name, attribute_type, is_single_reference)
+    attribute_type, is_single_reference, is_reference = _parse_attribute_type(attribute)
+    return EntityProperty(
+        attribute_name, attribute_type, is_single_reference, is_reference
+    )
 
 
-def _parse_attribute_type(attribute) -> Tuple[str, bool]:
+def _parse_attribute_type(attribute) -> Tuple[str, bool, bool]:
     global xml_root
     is_single_reference = False
+    is_reference = False
     try:
         if xml_root == None:
             return "object"
@@ -85,10 +88,9 @@ def _parse_attribute_type(attribute) -> Tuple[str, bool]:
         )
         reference_element_type = attribute.find(".//upperValue[@value]")
         cardinality = reference_element_type.attrib["value"]
-        if cardinality == "*":
-            data_type_name = "List<{}>".format(element.attrib["name"])
-        else:
-            data_type_name = element.attrib["name"]
+        is_reference = True
+        data_type_name = element.attrib["name"]
+        if cardinality != "*":
             is_single_reference = True
     except KeyError:
         element = attribute.find(
@@ -98,4 +100,4 @@ def _parse_attribute_type(attribute) -> Tuple[str, bool]:
         uml_type = type_string_raw.split("::")[-1]
         data_type_name = util.CSHARP_TYPE_MAPPER[uml_type]
 
-    return data_type_name, is_single_reference
+    return data_type_name, is_single_reference, is_reference

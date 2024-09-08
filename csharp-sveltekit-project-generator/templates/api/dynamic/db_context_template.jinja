@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using {{ project_name }}.Domain;
+using {{ project_name }}.Infrastructure.Extensions;
 
 namespace {{ project_name }}.Data;
 
@@ -21,5 +22,29 @@ public class {{ context_name }}DbContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ChangeTracker.SetAuditProperties();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ChangeTracker.SetAuditProperties();
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        ChangeTracker.SetAuditProperties();
+        return base.SaveChanges();
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ChangeTracker.SetAuditProperties();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 }

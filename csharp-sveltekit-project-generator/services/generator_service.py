@@ -29,6 +29,8 @@ def generate_api(output_path: str, project_name: str, classes: list[EntityClass]
     _generate_db_context(output_path, project_name, classes, env)
     _generate_repositories(output_path, project_name, classes, env)
     _generate_services(output_path, project_name, classes, env)
+    _generate_controllers(output_path, project_name, classes, env)
+    _generate_dtos(output_path, project_name, classes, env)
     _generate_service_extensions(output_path, project_name, classes, env)
 
 
@@ -200,6 +202,63 @@ def _generate_services(output_path: str, project_name: str, classes: list[Entity
             output_file.write(rendered_interface_content)
 
     print(f"API: All services files for {project_name} processed successfully.")
+
+def _generate_controllers(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating controllers for {project_name}...")
+    controller_template = env.get_template("controler_template.jinja")
+
+    os.makedirs(f"{output_path}/Controllers", exist_ok=True)
+
+    for entity_class in classes:
+        rendered_controller_content = controller_template.render(entity_class.get_context(project_name))
+
+        controller_output_file_path = os.path.join(
+            output_path, "Controllers", f"{entity_class.name}Service.cs"
+        )
+
+        with open(controller_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_controller_content)
+
+    print(f"API: All controllers files for {project_name} processed successfully.")
+
+def _generate_dtos(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating requests for {project_name}...")
+    request_template = env.get_template("request_template.jinja")
+    response_template = env.get_template("response_template.jinja")
+    mapping_profile_template = env.get_template("mapping_profile_template.jinja")
+
+    os.makedirs(f"{output_path}/Data/Requests", exist_ok=True)
+    os.makedirs(f"{output_path}/Data/Responses", exist_ok=True)
+    os.makedirs(f"{output_path}/Infrastructure/MappingProfiles", exist_ok=True)
+
+    for entity_class in classes:
+        rendered_request_content = request_template.render(entity_class.get_context(project_name))
+        rendered_response_content = response_template.render(entity_class.get_context(project_name))
+        rendered_mapping_profile_content = mapping_profile_template.render(entity_class.get_context(project_name))
+
+        requests_output_file_path = os.path.join(
+            output_path, "Data", "Requests", f"{entity_class.name}Request.cs"
+        )
+
+        responses_output_file_path = os.path.join(
+            output_path, "Data", "Responses", f"{entity_class.name}Response.cs"
+        )
+
+        mapping_profile_output_file_path = os.path.join(
+            output_path, "Infrastructure", "MappingProfiles", f"{entity_class.name}Response.cs"
+        )
+
+        with open(requests_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_request_content)
+
+        with open(responses_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_response_content)
+
+        with open(mapping_profile_output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_mapping_profile_content)
+
+    print(f"API: All dtos files for {project_name} processed successfully.")
+    
 
 def _generate_service_extensions(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
     print(f"API: Generating service extensions for {project_name}...")
