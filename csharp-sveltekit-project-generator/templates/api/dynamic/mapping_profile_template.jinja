@@ -9,7 +9,7 @@ public class {{ class_name }}Profile : Profile
 {
     public {{ class_name }}Profile()
     {
-        CreateMap<{{ class_name }}, {{ class_name }}Response>();
+        CreateMap<{{ class_name }}, {{ class_name }}Response>().MaxDepth(1);
         CreateMap<{{ class_name }}Request, {{ class_name }}>();
     }
 }

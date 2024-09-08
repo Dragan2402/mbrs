@@ -11,6 +11,9 @@ class EntityProperty:
         self.type = property_type
         self.is_single_reference = is_single_reference
         self.is_reference = is_reference
+        self.displayed_in_reference = False
+        self.include = False
+        self.label = name
 
     def get_context(self) -> dict:
         return {
@@ -18,4 +21,7 @@ class EntityProperty:
             "type": self.type,
             "is_single_reference": self.is_single_reference,
             "is_reference": self.is_reference,
+            "displayed_in_reference": self.displayed_in_reference,
+            "include": self.include,
+            "label": self.label,
         }

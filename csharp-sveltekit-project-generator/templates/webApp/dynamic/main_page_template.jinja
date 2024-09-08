@@ -1,0 +1,23 @@
+<script lang='ts'>
+    import { goto } from "$app/navigation";
+
+    const cardClass = "border p-4 flex flex-col justify-center items-center h-[100px] w-[200px] bg-slate-400 text-white border-slate-600 hover:animate-pulse";
+</script>
+
+<svelte:head>
+	<title>{{ project_name }}</title>
+</svelte:head>
+
+<div class="h-full w-full flex flex-col items-center justify-center p-20 gap-4">
+	<div>
+		Welcome to {{ project_name | upper }}
+	</div>
+
+	{% for class in classes %}
+    <button class={cardClass} on:click={() => goto("{{ class.name | lower }}/list")}>
+        <div>
+            {{ class.plural_name}}
+        </div>
+    </button>
+	{% endfor %}
+</div>

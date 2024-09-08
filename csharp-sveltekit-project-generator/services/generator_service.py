@@ -2,6 +2,7 @@ import os
 import shutil
 import uuid
 import jinja2
+from helpers.util import lower_first_letter
 from domain.entity_class import EntityClass
 
 API_STATIC_SOURCE_FOLDER = "csharp-sveltekit-project-generator/templates/api/static"
@@ -42,7 +43,13 @@ def generate_web_app(output_path: str, project_name: str, classes: list[EntityCl
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(WEB_APP_DYNAMIC_TEMPLATES_FOLDER)
     )
+
+    env.filters['lower_first_letter'] = lower_first_letter
+
+    _generate_main_page(output_path, project_name, classes, env)
     _generate_profile_pages(output_path, project_name, classes, env)
+    _generate_list_pages(output_path, project_name, classes, env)
+    _generate_mappers(output_path, project_name, classes, env)
 
 
 def _generate_structure(source_path: str, output_path: str, project_name: str, is_api: bool = False):
@@ -115,17 +122,33 @@ def _generate_profile_pages(output_path: str, project_name: str, classes: list[E
     template = env.get_template("profile_page_template.jinja")
 
     for entity_class in classes:
-        os.makedirs(f"{output_path}/src/routes/{entity_class.get_plural_name().lower()}/profile", exist_ok=True)
+        os.makedirs(f"{output_path}/src/routes/{entity_class.name.lower()}/profile", exist_ok=True)
         rendered_content = template.render(entity_class.get_context(project_name))
         output_file_path = os.path.join(
-            output_path, "src/routes", entity_class.get_plural_name().lower(), "profile", "+page.svelte"
+            output_path, "src/routes", entity_class.name.lower(), "profile", "+page.svelte"
         )
         with open(output_file_path, "w", encoding="utf-8") as output_file:
             output_file.write(rendered_content)
     
     print(f"WebAPP: All profile pages for {project_name} processed successfully.")
 
+def _generate_list_pages(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"WebAPP: Generating list pages for {project_name}...")
+    template = env.get_template("list_page_template.jinja")
+
+    for entity_class in classes:
+        os.makedirs(f"{output_path}/src/routes/{entity_class.name.lower()}/list", exist_ok=True)
+        rendered_content = template.render(entity_class.get_context(project_name))
+
+        output_file_path = os.path.join(
+            output_path, "src/routes", entity_class.name.lower(), "list", "+page.svelte"
+        )
+        with open(output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_content)
     
+    print(f"WebAPP: All list pages for {project_name} processed successfully.")
+
+
 def _generate_db_context(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
     context = {
         'project_name': project_name,
@@ -205,7 +228,7 @@ def _generate_services(output_path: str, project_name: str, classes: list[Entity
 
 def _generate_controllers(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
     print(f"API: Generating controllers for {project_name}...")
-    controller_template = env.get_template("controler_template.jinja")
+    controller_template = env.get_template("controller_template.jinja")
 
     os.makedirs(f"{output_path}/Controllers", exist_ok=True)
 
@@ -213,7 +236,7 @@ def _generate_controllers(output_path: str, project_name: str, classes: list[Ent
         rendered_controller_content = controller_template.render(entity_class.get_context(project_name))
 
         controller_output_file_path = os.path.join(
-            output_path, "Controllers", f"{entity_class.name}Service.cs"
+            output_path, "Controllers", f"{entity_class.name}Controller.cs"
         )
 
         with open(controller_output_file_path, "w", encoding="utf-8") as output_file:
@@ -282,3 +305,43 @@ def _generate_service_extensions(output_path: str, project_name: str, classes: l
         output_file.write(rendered_content)
 
     print(f"API: All service extensions files for {project_name} processed")
+
+def _generate_main_page(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"WebAPP: Generating main page for {project_name}...")
+    template = env.get_template("main_page_template.jinja")
+
+    os.makedirs(f"{output_path}/src/routes", exist_ok=True)
+
+    rendered_content = template.render({
+        'project_name': project_name,
+        'context_name': project_name.split('.')[0],
+        'classes': [{
+            'name': cls.name,
+            'plural_name': cls.get_plural_name(),
+        } for cls in classes]
+    })
+
+    output_file_path = os.path.join(output_path, "src", "routes", "+page.svelte")
+    with open(output_file_path, "w", encoding="utf-8") as output_file:
+        output_file.write(rendered_content)
+
+    print(f"WebAPP: Main page for {project_name} processed successfully.")
+
+def _generate_mappers(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"API: Generating mappers for {project_name}...")
+    mapper_template = env.get_template("mapper_template.jinja")
+
+    os.makedirs(f"{output_path}/src/lib/helpers", exist_ok=True)
+
+    rendered_content = mapper_template.render({
+        'project_name': project_name,
+        'context_name': project_name.split('.')[0],
+        'classes': [cls.get_context(project_name) for cls in classes]
+    })
+
+    output_file_path = os.path.join(output_path, "src", "lib", "helpers", "mappers.ts")
+
+    with open(output_file_path, "w", encoding="utf-8") as output_file:
+        output_file.write(rendered_content)
+
+    print(f"WebAPP: Mappers for {project_name} processed successfully.")

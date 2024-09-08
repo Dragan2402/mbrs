@@ -4,4 +4,5 @@ namespace {{ project_name }}.Application.Services;
 
 public interface I{{ class_name }}Service
 {
+    Task<List<{{ class_name }}>> GetAllAsync();
 }
