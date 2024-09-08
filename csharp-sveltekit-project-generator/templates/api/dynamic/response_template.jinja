@@ -1,0 +1,20 @@
+namespace {{ project_name }}.Data.Responses;
+
+public record {{ class_name }}Response
+{
+    public long Id { get; set; }
+    {% for property in properties %}   
+    {% if property.is_reference %}
+        {% if property.is_single_reference %}
+        public {{ property.type }}Response {{ property.name }} { get; set; }
+        public long {{ property.name + 'Id' }} { get; set; }
+        {% else %}
+        public List<{{property.type}}Response> {{ property.name }} { get; set; } 
+        {% endif %}
+    {% else %} 
+    public {{ property.type }} {{ property.name }} { get; set; } 
+    {% endif %}
+    {% endfor %}
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+}

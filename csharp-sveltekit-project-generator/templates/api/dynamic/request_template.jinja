@@ -1,14 +1,14 @@
-namespace {{ project_name }}.Domain;
+namespace {{ project_name }}.Data.Requests;
 
-public class {{ class_name }} : Entity
+public record {{ class_name }}Request
 {
+    public long? Id { get; set; }
     {% for property in properties %}   
     {% if property.is_reference %}
         {% if property.is_single_reference %}
-        public {{ property.type }} {{ property.name }} { get; set; } 
         public long {{ property.name + 'Id' }} { get; set; }
         {% else %}
-        public List<{{ property.type }}> {{ property.name }} { get; set; } 
+        public List<long> {{ property.name }}Ids { get; set; } 
         {% endif %}
     {% else %} 
     public {{ property.type }} {{ property.name }} { get; set; } 

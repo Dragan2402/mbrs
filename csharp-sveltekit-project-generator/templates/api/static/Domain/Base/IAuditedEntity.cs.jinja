@@ -1,8 +1,7 @@
 namespace {{ project_name }}.Domain;
 
-public abstract class Entity : IEntity, IAuditedEntity
+public interface IAuditedEntity
 {
-    public long Id { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 }
