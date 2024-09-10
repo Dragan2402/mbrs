@@ -2,6 +2,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using {{ project_name }}.Application.Services;
 using {{ project_name }}.Data.Responses;
+using {{ project_name }}.Data.Requests;
+using {{ class_name }}Entity = {{ project_name }}.Domain.{{ class_name }};
 
 namespace {{ project_name }}.Controllers;
 
@@ -55,5 +57,13 @@ public class {{ class_name }}Controller : ControllerBase
     {
         await {{ class_name | lower }}Service.DeleteAsync(id);
         return Ok();
+    }
+
+    [HttpPost(Name = "create{{ class_name }}")]
+    [ProducesResponseType(typeof({{ class_name }}Response), StatusCodes.Status201Created)]
+    public async Task<IActionResult> Create([FromBody] {{ class_name }}Request request)
+    {
+        var {{ class_name | lower }} = await {{ class_name | lower }}Service.CreateAsync(mapper.Map<{{ class_name }}Entity>(request));
+        return CreatedAtAction("create{{ class_name }}", mapper.Map<{{ class_name }}Response>({{ class_name | lower }}));
     }
 }

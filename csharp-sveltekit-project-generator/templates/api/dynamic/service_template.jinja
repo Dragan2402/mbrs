@@ -34,4 +34,10 @@ public class {{ class_name }}Service : I{{ class_name }}Service
 
         {{ class_name | lower}}Repository.Delete({{ class_name | lower}});
     }
+
+    public async Task<{{ class_name }}> CreateAsync({{ class_name }} {{ class_name | lower }})
+    {
+        var created{{ class_name }} = await {{ class_name | lower }}Repository.AddAsync({{ class_name | lower }});
+        return created{{ class_name }};
+    }
 }
