@@ -1,0 +1,179 @@
+<script lang='ts'>
+  import { onMount } from 'svelte';
+  import { goto } from "$app/navigation";
+  import api from "$lib/auth/http";
+  import type { {{ class_name }}Request } from "$lib/api/apiV1";
+
+  const {{ class_name | lower_first_letter }}Form: {{ class_name }}Request = {
+    {% for property in properties %}
+      {% if property.name == 'id' %}
+    id: null,
+      {% else %}
+        {% if property.is_reference %}
+          {% if property.is_single_reference %}
+    {{ property.name | lower_first_letter }}Id: 0,
+          {% else %}
+    {{ property.name | lower_first_letter }}Ids: [],
+          {% endif %}
+      {% else %}
+    {{ property.name | lower_first_letter }}: '',
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  }
+
+  let loading = true;
+
+  {% for property in properties %}
+    {% if property.is_reference %}
+      {% if property.is_single_reference %}
+  let {{ property.name | lower_first_letter }}Options = [];
+      {% else %}
+  let {{ property.name | lower_first_letter }}MultiOptions = [];
+  let is{{ property.name }}DropdownOpen = false;
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  onMount(async () => {
+    try {
+      loading = true;
+
+      {% for property in properties %}
+        {% if property.is_reference %}
+          {% if property.is_single_reference %}
+      {{ property.name | lower_first_letter }}Options = (await api.v1.{{ property.type | lower_first_letter }}.getAll{{ property.type }}s()).data;
+          {% else %}
+      {{ property.name | lower_first_letter }}MultiOptions = (await api.v1.{{ property.type | lower_first_letter }}.getAll{{ property.type }}s()).data;
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+    }
+    finally{
+      loading = false;
+    }
+  })
+
+  const handleSubmit = async () => {
+    console.log('Form submitted', {{ class_name | lower_first_letter }}Form);
+    const response = await api.v1.{{ class_name | lower_first_letter }}.create{{ class_name }}({{ class_name | lower_first_letter }}Form);
+
+    if (response.ok) {
+      console.log('Success 200');
+      goto('/{{ class_name | lower_first_letter }}/list');
+    }
+  };
+
+  {% for property in properties %}
+    {% if property.is_reference and not property.is_single_reference %}
+  const toggle{{ property.name }}Dropdown = () => {
+    is{{ property.name }}DropdownOpen = !is{{ property.name }}DropdownOpen;
+  };
+    {% endif %}
+  {% endfor %}
+
+  {% for property in properties %}
+    {% if property.is_reference and not property.is_single_reference %}
+  const handle{{ property.name }}MultiSelectChange = (option) => {
+    if ({{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids?.includes(option.id)) {
+      {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids = {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids.filter((id) => id !== option.id);
+    } else {
+      {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids = [...{{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids, option.id];
+    }
+  };
+    {% endif %}
+  {% endfor %}
+  
+  
+</script>
+
+<svelte:head>
+    <title>{{ class_name }} Form</title>
+</svelte:head>
+
+<div class="flex items-center justify-center min-h-screen">
+  <div class="max-w-md w-full p-6 bg-slate-400 text-white rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">{{ class_name }}</h2>
+    <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+      {% for property in properties %}
+        {% if property.name == 'id' %}
+
+        {% else %}
+          {% if property.is_reference %}
+            {% if property.is_single_reference %}
+      <div>
+        <label class="block text-sm font-medium" for="single-select-{{ property.name | lower_first_letter }}">Select {{ property.name | lower_first_letter }}</label>
+        <select
+          id="single-select-{{ property.name | lower_first_letter }}"
+          bind:value={ {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Id }
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-black"
+        >
+          <option value="" disabled>Select an option</option>
+          {{ '{#each ' + property.name | lower_first_letter + 'Options' + ' as option}' }}
+            <option value={option.id}>{option.id}</option>
+          {/each}
+        </select>
+      </div>
+            {% else %}
+      <div>
+        <label class="block text-sm font-medium" for="multi-select-{{ property.name | lower_first_letter }}">Select multiple {{ property.name | lower_first_letter }}</label>
+        <div class="relative">
+          <div
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-black cursor-pointer"
+            on:click={toggle{{ property.name }}Dropdown}
+          >
+            {{ '{#if ' + class_name | lower_first_letter + 'Form.' + property.name | lower_first_letter + 'Ids?.length === 0}' }}
+              Select multiple options
+            {:else}
+              { {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids?.map(id => {{ property.name | lower_first_letter }}MultiOptions.find(option => option.id === id).id).join(', ')}
+            {/if}
+          </div>
+
+          <!-- Dropdown Options -->
+          {{ '{#if ' + 'is' + property.name + 'DropdownOpen}' }}
+            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg text-black">
+              {{ '{#each ' + property.name | lower_first_letter + 'MultiOptions as option}' }}
+                <div
+                  class="px-4 py-2 hover:bg-gray-100 flex items-center"
+                  on:click={() => handle{{ property.name }}MultiSelectChange(option)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={ {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }}Ids?.includes(option.id)}
+                    class="mr-2"
+                  />
+                  <span>{option.id}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      </div>
+            {% endif %}
+          {% else %}
+      <div>
+        <label class="block text-sm font-medium" for="{{ property.name | lower_first_letter }}">{{ property.name }}</label>
+        <input
+          id="{{ property.name | lower_first_letter }}"
+          type="text"
+          bind:value={ {{ class_name | lower_first_letter }}Form.{{ property.name | lower_first_letter }} }
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm text-black"
+          placeholder="{{ property.name | lower_first_letter }}"
+        />
+      </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      
+      <div>
+        <button
+          type="submit"
+          class="w-full bg-cyan-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

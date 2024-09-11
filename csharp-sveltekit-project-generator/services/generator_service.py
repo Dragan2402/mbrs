@@ -50,6 +50,7 @@ def generate_web_app(output_path: str, project_name: str, classes: list[EntityCl
     _generate_profile_pages(output_path, project_name, classes, env)
     _generate_list_pages(output_path, project_name, classes, env)
     _generate_mappers(output_path, project_name, classes, env)
+    _generate_form_pages(output_path, project_name, classes, env)
 
 
 def _generate_structure(source_path: str, output_path: str, project_name: str, is_api: bool = False):
@@ -345,3 +346,19 @@ def _generate_mappers(output_path: str, project_name: str, classes: list[EntityC
         output_file.write(rendered_content)
 
     print(f"WebApp: Mappers for {project_name} processed successfully.")
+
+def _generate_form_pages(output_path: str, project_name: str, classes: list[EntityClass], env: jinja2.Environment):
+    print(f"WebApp: Generating form pages for {project_name}...")
+    template = env.get_template("form_page_template.jinja")
+
+    for entity_class in classes:
+        os.makedirs(f"{output_path}/src/routes/{entity_class.name.lower()}/form", exist_ok=True)
+        rendered_content = template.render(entity_class.get_context(project_name))
+
+        output_file_path = os.path.join(
+            output_path, "src/routes", entity_class.name.lower(), "form", "+page.svelte"
+        )
+        with open(output_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(rendered_content)
+    
+    print(f"WebApp: All form pages for {project_name} processed successfully.")

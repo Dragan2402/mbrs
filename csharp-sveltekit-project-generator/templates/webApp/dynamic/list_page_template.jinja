@@ -29,38 +29,41 @@
 </svelte:head>
 
 <div class="flex flex-col gap-4 p-10 h-full">
-    <button on:click={() => goto("/")} class="mr-auto border p-2 border-gray-800">Go Back</button>
-    {{ '{#if loading}'}}
-    <div class="flex h-full w-full items-center justify-center animate-pulse">
-      Loading...
-    </div>
-    {:else}
-    <div class="text-2xl mt-4">
-      {{ plural_name }}:
-    </div>
-    <div class="flex flex-wrap gap-10">
-      {{ '{#each ' + plural_name | lower + ' as ' + class_name | lower + ' }' }}
-        <button class="min-h-[150px] w-[250px] border border-gray-600 p-4 flex flex-col rounded-xl"
-        on:click={() => goto(`/{{ class_name | lower + "/profile?id=${" + class_name | lower +  ".id}"  }}`)}>
-          <div>
-            {{ '{' + class_name | lower + '.id}' }}
+  <div class="flex flex-row gap-4">
+    <button on:click={() => goto("/")} class="border p-2 border-gray-800">Go Back</button>
+    <button on:click={() => goto("/{{ class_name | lower_first_letter }}/form")} class="border p-2 border-gray-800">Add {{ class_name }}</button>
+  </div>
+  {{ '{#if loading}'}}
+  <div class="flex h-full w-full items-center justify-center animate-pulse">
+    Loading...
+  </div>
+  {:else}
+  <div class="text-2xl mt-4">
+    {{ plural_name }}:
+  </div>
+  <div class="flex flex-wrap gap-10">
+    {{ '{#each ' + plural_name | lower + ' as ' + class_name | lower + ' }' }}
+      <button class="min-h-[150px] w-[250px] border border-gray-600 p-4 flex flex-col rounded-xl"
+      on:click={() => goto(`/{{ class_name | lower + "/profile?id=${" + class_name | lower +  ".id}"  }}`)}>
+        <div>
+          {{ '{' + class_name | lower + '.id}' }}
+        </div>
+            {% for property in properties %}   
+          <div class="text-left">
+          {% if property.is_reference %}
+              {{ property.label }}:
+              {% if property.is_single_reference %}
+              {{ '{'  + class_name | lower + "." + property.name | lower_first_letter + ' ? ' + 'map' + property.type + "ResponseToString(" + class_name | lower + "." + property.name | lower_first_letter + ")" +': ""'+ '}'}}
+              {% else %}
+              {{ '{' + class_name | lower + "." + property.name | lower_first_letter + '?.' + 'map(map' + property.type + "ResponseToString)" + ' || "None" }' }}
+              {% endif %}
+          {% else %} 
+              {{ property.label }}: {{ '{' + class_name | lower + "." + property.name | lower_first_letter + "}" }}
+          {% endif %}
           </div>
-              {% for property in properties %}   
-            <div class="text-left">
-            {% if property.is_reference %}
-                {{ property.label }}:
-                {% if property.is_single_reference %}
-                {{ '{'  + class_name | lower + "." + property.name | lower_first_letter + ' ? ' + 'map' + property.type + "ResponseToString(" + class_name | lower + "." + property.name | lower_first_letter + ")" +': ""'+ '}'}}
-                {% else %}
-                {{ '{' + class_name | lower + "." + property.name | lower_first_letter + '?.' + 'map(map' + property.type + "ResponseToString)" + ' || "None" }' }}
-                {% endif %}
-            {% else %} 
-                {{ property.label }}: {{ '{' + class_name | lower + "." + property.name | lower_first_letter + "}" }}
-            {% endif %}
-            </div>
-            {% endfor %}
-        </button>
-      {/each}
-    </div>
-    {/if}
+          {% endfor %}
+      </button>
+    {/each}
+  </div>
+  {/if}
 </div>
